@@ -1,0 +1,9 @@
+{
+	"name": "bandit-server",
+	"description": "",
+	"copyright": "Copyright © 2014, Michael Zemsky",
+	"authors": ["Michael Zemsky"],
+	"dependencies": {
+		"vibe-d" : "~master"
+	}
+}
