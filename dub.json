@@ -1,0 +1,11 @@
+{
+    "name": "Bandit",
+    "description": "",
+    "copyright": "Copyright (C) 2014 Michael Zemsky. All rights reserved",
+    "homepage": "https://github.com/zmike808/Bandit",
+    "authors": ["Michael Zemsky"],
+    "targetType": "executable",
+    "dependencies": {
+        "vibe-d": "~master"
+    }
+}
