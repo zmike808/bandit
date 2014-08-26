@@ -1,24 +1,52 @@
-import libtorrent as lt
-import time
+#!/bin/python
 
-ses = lt.session()
-ses.listen_on(6881, 6891)
+import sys
+import os
+import libtorrent
 
-e = lt.bdecode(open("test.torrent", 'rb').read())
-info = lt.torrent_info(e)
+if len(sys.argv) < 3:
+	print 'usage make_torrent.py file tracker-url'
+	sys.exit(1)
 
-params = { save_path: './', \
-        storage_mode: lt.storage_mode_t.storage_mode_sparse, \
-        ti: info }
-h = ses.add_torrent(params)
+input = os.path.abspath(sys.argv[1])
 
-while (not h.is_seed()):
-        s = h.status()
+fs = libtorrent.file_storage()
 
-        state_str = ['queued', 'checking', 'downloading metadata', \
-                'downloading', 'finished', 'seeding', 'allocating']
-        print '%.2f%% complete (down: %.1f kb/s up: %.1f kB/s peers: %d) %s' % \
-                (s.progress * 100, s.download_rate / 1000, s.upload_rate / 1000, \
-                s.num_peers, state_str[s.state])
+#def predicate(f):
+#	print f
+#	return True
+#libtorrent.add_files(fs, input, predicate)
 
-        time.sleep(1)
+parent_input = os.path.split(input)[0]
+
+for root, dirs, files in os.walk(input):
+	# skip directories starting with .
+	if os.path.split(root)[1][0] == '.': continue
+
+	for f in files:
+		# skip files starting with .
+		if f[0] == '.': continue
+
+		# skip thumbs.db on windows
+		if f == 'Thumbs.db': continue
+
+		fname = os.path.join(root[len(parent_input)+1:], f)
+		size = os.path.getsize(os.path.join(parent_input, fname))
+		print '%10d kiB  %s' % (size / 1024, fname)
+		fs.add_file(fname, size);
+
+if fs.num_files() == 0:
+	print 'no files added'
+	sys.exit(1)
+
+t = libtorrent.create_torrent(fs, 0, 4 * 1024 * 1024)
+
+t.add_tracker(sys.argv[2])
+t.set_creator('libtorrent %s' % libtorrent.version)
+
+libtorrent.set_piece_hashes(t, parent_input, lambda x: sys.stderr.write('.'))
+sys.stderr.write('\n')
+
+f = open('out.torrent', 'wb+')
+print >>f, libtorrent.bencode(t.generate())
+f.close()
