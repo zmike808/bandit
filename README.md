@@ -6,4 +6,4 @@ Development
 
 Client - TBD
 
-Server - REST api, using python
+Server - REST api, using D
