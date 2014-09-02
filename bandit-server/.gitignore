@@ -2,4 +2,8 @@
 docs.json
 __dummy.html
 *.o
+*.exe
+*.sln
+*.dll
+*.*proj
 *.obj
